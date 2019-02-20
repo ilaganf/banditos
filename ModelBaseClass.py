@@ -11,6 +11,19 @@ class ModelBaseClass():
         pass
 
     """
+    @param dose, daily dose of medicine in mg 
+    @returns action 
+    
+    """
+    def dose_to_action(self, dose):
+        if dose < 3:
+            return self.LOW_DOSE
+        elif dose <= 7:
+            return self.MED_DOSE
+        else:
+            return self.HIGH_DOSE
+
+    """
     Simulates and evaluates online learning model with samples from data_loader
     
     @returns cumulative_regret, avg_regret 

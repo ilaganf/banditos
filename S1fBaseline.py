@@ -18,5 +18,5 @@ class S1fBaseline(ModelBaseClass):
         for i in self.relevant_col_indices:
             sqrt_weekly_dose += self.weights[i] * patient[i]
         daily_dose = (sqrt_weekly_dose ** 2) * 7
-        return daily_dose
+        return self.dose_to_action(daily_dose)
 
