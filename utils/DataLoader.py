@@ -13,7 +13,7 @@ class DataLoader():
         raw = pd.read_csv(filename_csv)
         self.labels = raw[GROUND]
         raw.drop(GROUND, axis=1, inplace=True)
-        self.data = pd.get_dummies(raw)
+        self.data = pd.get_dummies(raw, prefix='indic')
 
     
     def sample_next_patient(self):
