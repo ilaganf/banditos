@@ -1,7 +1,8 @@
 
-class BaseModel():
+class ModelBaseClass():
     def __init__(self, data_loader):
         self.data_loader = data_loader
+        self.LOW_DOSE, self.MED_DOSE, self.HIGH_DOSE = 0, 1, 2
 
     def next_action(self, patient):
         pass
