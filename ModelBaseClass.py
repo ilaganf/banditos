@@ -29,4 +29,13 @@ class ModelBaseClass():
     @returns cumulative_regret, avg_regret 
     """
     def evaluate_online(self):
-        pass
+        cumulative_regret = 0.0
+        patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
+        while patient is not None:
+            # reward is 0 if correct action, -1 otherwise
+            ideal_action = self.dose_to_action(ideal_mg_per_week / 7.0)
+            actual_action = self.next_action(patient)
+            if ideal_action != actual_action:
+                cumulative_regret += -1
+            patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
+        return cumulative_regret, cumulative_regret / self.data_loader.num_samples()

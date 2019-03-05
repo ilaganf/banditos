@@ -1,4 +1,5 @@
-import ModelBaseClass
+from ModelBaseClass import ModelBaseClass
+from utils.DataLoader import DataLoader
 
 class FixedDoseBaseline(ModelBaseClass):
     def __init__(self, data_loader):
@@ -6,4 +7,9 @@ class FixedDoseBaseline(ModelBaseClass):
 
     def next_action(self, patient):
         return self.MED_DOSE
+
+
+baseline = FixedDoseBaseline(DataLoader("data/warfarin.csv"))
+cum_regret, avg_regret = baseline.evaluate_online()
+print("cum_regret {}, avg_regret {}".format(cum_regret, avg_regret))
 
