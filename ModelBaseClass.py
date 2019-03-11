@@ -3,11 +3,15 @@ class ModelBaseClass():
     def __init__(self, data_loader):
         self.data_loader = data_loader
         self.LOW_DOSE, self.MED_DOSE, self.HIGH_DOSE = 0, 1, 2
+        self.actions = [self.LOW_DOSE, self.MED_DOSE, self.HIGH_DOSE]
 
     def next_action(self, patient):
         pass
 
     def reward_for_timestep(self):
+        pass
+
+    def update_model(self, patient, actual_action, ideal_action):
         pass
 
     """
@@ -23,6 +27,9 @@ class ModelBaseClass():
         else:
             return self.HIGH_DOSE
 
+    def ideal_action(self, ideal_mg_per_week):
+        return self.dose_to_action(ideal_mg_per_week / 7.0)
+
     """
     Simulates and evaluates online learning model with samples from data_loader
     
@@ -33,8 +40,9 @@ class ModelBaseClass():
         patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
         while patient is not None:
             # reward is 0 if correct action, -1 otherwise
-            ideal_action = self.dose_to_action(ideal_mg_per_week / 7.0)
+            ideal_action = self.ideal_action(ideal_mg_per_week)
             actual_action = self.next_action(patient)
+            self.update_model(patient, actual_action, ideal_action)
             if ideal_action != actual_action:
                 cumulative_regret += -1
             patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
