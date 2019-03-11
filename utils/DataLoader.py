@@ -28,5 +28,7 @@ class DataLoader():
         @returns patient, row of features for a given patient, or None if all patients already sampled 
         """
         # TODO: randomly sample instead of iterate through each row in file
+
+        # TODO: we need to sanitize the input to get rid of the NaN's
         self.ind += 1
         return (None, None) if self.ind > len(self.data) else (self.data[self.ind - 1:self.ind], self.labels[self.ind - 1])
