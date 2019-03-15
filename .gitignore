@@ -1,5 +1,6 @@
 ._*
 .DS_Store
+data/metadata.xls
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

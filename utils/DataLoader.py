@@ -15,6 +15,7 @@ class DataLoader():
         self.data = pd.get_dummies(raw, prefix='indic').sample(frac=1, replace=False, random_state=seed)
         self.labels = self.data[GROUND]
         self.data.drop(GROUND, axis=1, inplace=True)
+        self.data.fillna(0, inplace=True) # replace N/A with 0 for now
         self.ind = 0
 
     # @returns the total number of data points in the dataset
@@ -28,6 +29,7 @@ class DataLoader():
         @returns patient, row of features for a given patient, or None if all patients already sampled 
         """
         # TODO: randomly sample instead of iterate through each row in file
+        #        the entire dataset is already shuffled upon initialization -Kiko
 
         # TODO: we need to sanitize the input to get rid of the NaN's
         self.ind += 1
