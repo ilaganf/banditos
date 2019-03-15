@@ -43,6 +43,6 @@ class LinUCB(ModelBaseClass):
         self.b[action] += reward * np.squeeze(x_t, -1)
 
 
-lin_ucb = LinUCB(DataLoader("data/warfarin.csv"), 2)
+lin_ucb = LinUCB(DataLoader("data/warfarin.csv"), 1)
 cum_regret, avg_regret = lin_ucb.evaluate_online()
 print("cum_regret {}, avg_regret {}".format(cum_regret, avg_regret))
