@@ -22,42 +22,78 @@ import pandas as pd
 import numpy as np
 
 FILENAME = '../data/warfarin.csv'
+NEW_FILENAME = '../data/warfarin_clean.csv'
 
 # general columns that can be safely dropped
 DROP = ['Unknown', 'PharmGKB', 'Project Site', \
         'statin', 'Amiodarone', "Carbamazepine",\
         'Phenytoin', 'Rifampin', 'Antibiotics',\
-        'Azoles', 'Supplements']
+        'Azoles', 'Supplements', 'Unnamed','`']
 
-SEMICOLONS = ['Comorbidities', 'Indication for Warfarin Treatment',\
-              'Medications']
+# categories that are semicolon-separated, plus indicator prefix
+SEMICOLONS = [('Comorbidities', 'comorb: '), ('Indication for Warfarin Treatment', 'indication: '),\
+              ('Medications', 'med: ')]
 
-def gather_categories(series, default_val):
+def gather_categories(series, prefix):
     '''
     Gets the category names for non-numerical, semicolon-separated entries
+    then creates a dataframe with the appropriate indicators filled out
     '''
     categories = set()
-    categories.add(default_val)
+    # gathers all the unique categories to be turned into column headers
     for entry in series:
         if type(entry) is float: 
             continue 
         indiv_entries = entry.strip().split(';')
         for x in indiv_entries:
             categories.add(x.strip().lower())
-    return list(categories)
 
-def fill_indicators(df, categories):
-    pass
 
-    
+    df_dict = {prefix + cat:[] for cat in categories}
+    for val in series:
+        non_float = type(val) is not float
+        for cat in categories:
+            if non_float:
+                df_dict[prefix + cat].append(int(cat in val.strip().lower()))
+            else:
+                df_dict[prefix + cat].append(0)
+    return pd.DataFrame(df_dict)
+
+
 def main():
     raw = pd.read_csv(FILENAME)
+
+    # drop useless columns
     for colname in raw.columns:
         for col in DROP:
             if col in colname:
                 raw.drop(colname, axis=1, inplace=True)
 
+    # create clean indicator columns for semicolon-separated columns
+    for col, prefix in SEMICOLONS:
+        new_df = gather_categories(raw[col], prefix)
+        raw.drop(col, axis=1, inplace=True)
+        raw = pd.concat([raw, new_df], axis=1)
 
+    # condense race and ethnicity
+    raw['Ethnicity'] = (raw['Ethnicity'] == 'Hispanic or Latino').astype(int)
+    races = ['Asian', 'Black or African American', 'White']
+    race_dict = {'Asian':[], 'Black or African American':[], 'White':[], 'Unknown':[]}
+    for val in raw['Race']:
+        if type(val) is float: # nan, defaults to unknown
+            race_dict['Asian'].append(0)
+            race_dict['Black or African American'].append(0)
+            race_dict['White'].append(0)
+            race_dict['Unknown'].append(1)
+        else:
+            for key in race_dict:
+                race_dict[key].append(key in val)
+    raw.drop('Race', axis=1, inplace=True)
+    raw = pd.concat([raw, pd.DataFrame(race_dict)], axis=1)
+
+
+    clean = pd.get_dummies(raw, prefix='indic')
+    clean.to_csv(NEW_FILENAME)
 
 if __name__ == '__main__':
     main()
