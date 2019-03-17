@@ -48,15 +48,12 @@ def gather_categories(series, prefix):
         for x in indiv_entries:
             categories.add(x.strip().lower())
 
-
     df_dict = {prefix + cat:[] for cat in categories}
     for val in series:
-        non_float = type(val) is not float
+        is_float = type(val) is float
         for cat in categories:
-            if non_float:
-                df_dict[prefix + cat].append(int(cat in val.strip().lower()))
-            else:
-                df_dict[prefix + cat].append(0)
+            entry = 0 if is_float else int(cat in val.strip().lower())
+            df_dict[prefix + cat].append(entry)
     return pd.DataFrame(df_dict)
 
 
@@ -78,21 +75,22 @@ def main():
     # condense race and ethnicity
     raw['Ethnicity'] = (raw['Ethnicity'] == 'Hispanic or Latino').astype(int)
     races = ['Asian', 'Black or African American', 'White']
-    race_dict = {'Asian':[], 'Black or African American':[], 'White':[], 'Unknown':[]}
+    race_dict = {'Asian':[], 'Black or African American':[], 'White':[], 'Unknown Race':[]}
     for val in raw['Race']:
-        if type(val) is float: # nan, defaults to unknown
-            race_dict['Asian'].append(0)
-            race_dict['Black or African American'].append(0)
-            race_dict['White'].append(0)
-            race_dict['Unknown'].append(1)
+        if type(val) is float: # nan, should default to unknown
+            for race in races:
+                race_dict[race].append(0)
+            race_dict['Unknown Race'].append(1)
         else:
-            for key in race_dict:
-                race_dict[key].append(key in val)
+            for race in races:
+                race_dict[race].append(int(race in val))
+            race_dict['Unknown Race'].append(int('Unknown' in val))
     raw.drop('Race', axis=1, inplace=True)
     raw = pd.concat([raw, pd.DataFrame(race_dict)], axis=1)
 
 
     clean = pd.get_dummies(raw, prefix='indic')
+    clean.fillna(0, inplace=True) # in case nas escaped earlier somehow
     clean.to_csv(NEW_FILENAME)
 
 if __name__ == '__main__':
