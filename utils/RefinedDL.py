@@ -1,27 +1,28 @@
 '''
 Refined dataloader
 '''
+import pandas as pd
 
-'''
-Observations about the data:
-- "Ethnicities" only takes values "not Hispanic or Latino" and "Hispanic or Latino" (and unknown)
-        - can be converted to 0 or 1
-- "Race" is one of 'Asian', 'Black or African American', 'White', or 'Unknown'
-- Can drop comments on the data (under 'unknown')
-- Comorbidities are as strings and listed separated by semicolons
-'''
+from utils.DataLoader import DataLoader
 
-from DataLoader import DataLoader
+GROUND = "Therapeutic Dose of Warfarin"
 
 class RefinedDL(DataLoader):
     '''
-    Less lazy data loader that makes efforts to better clean and present the data
+    Data loader that uses features based on a feature list
     '''
-    def __init__(self, filename_csv, seed=420):
-        raw = pd.read_csv(filename_csv)
-        cleaned = self._clean(raw)
 
-    def _clean(self, raw):
-        for colname in raw.columns:
-            pass
-        pass
+    def __init__(self, filename_csv, features=None, seed=420):
+        '''
+        Mostly same as regular DataLoader, with main difference being features
+
+        @param features: can be int or iterable. If int, only uses that many columns
+                         of the data. If iterable, uses the features specified in the iterable
+        '''
+        raw = pd.read_csv(filename_csv)
+        self.data = raw.sample(frac=1, replace=False, random_state=seed)
+        self.labels = self.data[GROUND]
+        self.data.drop(GROUND, axis=1, inplace=True)
+        if features:
+            self.data = self.data[:,:features] if type(features) is int else self.data.loc[:,features]
+        self.ind = 0

@@ -72,6 +72,16 @@ def main():
         raw.drop(col, axis=1, inplace=True)
         raw = pd.concat([raw, new_df], axis=1)
 
+    # condense age
+    age_dict = {'10 - 19':1, '20 - 29':2, '30 - 39':3, '40 - 49':4, \
+                '50 - 59':5, '60 - 69':6, '70 - 79':7, '80 - 89':8, \
+                '90+':9}
+    age_vals = []
+    for val in raw['Age']:    
+        new_val = 0 if val not in age_dict else age_dict[val]
+        age_vals.append(new_val)
+    raw['Age'] = age_vals
+
     # condense race and ethnicity
     raw['Ethnicity'] = (raw['Ethnicity'] == 'Hispanic or Latino').astype(int)
     races = ['Asian', 'Black or African American', 'White']

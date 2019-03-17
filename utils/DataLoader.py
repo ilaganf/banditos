@@ -22,15 +22,14 @@ class DataLoader():
     def num_samples(self):
         return len(self.data)
 
+    def get_features(self):
+        return list(self.data.columns)
+
     def sample_next_patient(self):
         """
         Samples without replacement from the patients in the dataset 
 
         @returns patient, row of features for a given patient, or None if all patients already sampled 
         """
-        # TODO: randomly sample instead of iterate through each row in file
-        #        the entire dataset is already shuffled upon initialization -Kiko
-
-        # TODO: we need to sanitize the input to get rid of the NaN's
         self.ind += 1
         return (None, None) if self.ind > len(self.data) else (self.data[self.ind - 1:self.ind], self.labels[self.ind - 1])
