@@ -15,7 +15,7 @@ from utils.eval import evaluate
 '''
 fixed dose: -2319 regret, 53.36% accuracy
 
-age, weight, height, gender: -2330 regret, 53.28% accuracy
+age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 
 '''
 # FEATURES = ['Weight','indic_male', 'indic_female', 'Age', 'Height']
@@ -23,7 +23,7 @@ FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
             'indic_G', 'indic_T']
 
-NUM_TRIALS = 20
+NUM_TRIALS = 2
 
 def main():
     data = pd.read_csv('data/warfarin_clean.csv')
@@ -54,6 +54,7 @@ def main():
     total = sum(counts)
 
     print("Results (averaged over {} trials)".format(NUM_TRIALS))
+    print("Alpha = ", lin_ucb.alpha)
     print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
     print("Accuracy: ", avg_accuracy)
     print("Average low: {} ({}%)".format(counts[0], 100*(counts[0]/total)))

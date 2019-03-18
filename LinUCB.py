@@ -17,7 +17,7 @@ class LinUCB(ModelBaseClass):
         @param num_features number of features per patient to use for regression
         """
         super(LinUCB, self).__init__(data_loader)
-        self.alpha = 2.36 # assuming delta = 0.05 todo: check
+        self.alpha = 0 # assuming delta = 0.05 todo: check
         self.num_arms = len(self.actions)
         self.num_features = len(self.data_loader.get_features())
 
@@ -40,7 +40,7 @@ class LinUCB(ModelBaseClass):
               pred_reward = x_t.T @ A_a_inv @ self.b[action]
               variance_bonus = self.alpha * np.sqrt(x_t.T @ A_a_inv @ x_t)
               expected_rewards.append((np.asscalar(pred_reward[0] + variance_bonus), action))
-        next_action = list(sorted(expected_rewards, key=lambda x: x[0]))[-1][1]
+        next_action = max(expected_rewards)[1]
         return next_action
 
 
