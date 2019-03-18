@@ -18,6 +18,12 @@ class DataLoader():
         self.data.fillna(0, inplace=True) # replace N/A with 0 for now
         self.ind = 0
 
+    def reshuffle(self):
+        self.data = pd.concat([self.data, self.labels], axis=1).sample(frac=1, replace=False)
+        self.labels = self.data[GROUND]
+        self.data.drop(GROUND, axis=1, inplace=True)
+        self.ind = 0
+
     # @returns the total number of data points in the dataset
     def num_samples(self):
         return len(self.data)

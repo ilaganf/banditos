@@ -38,6 +38,7 @@ class ModelBaseClass():
     def evaluate_online(self):
         cumulative_regret = 0.0
         patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
+        self.predictions = []
         while patient is not None:
             # reward is 0 if correct action, -1 otherwise
             ideal_action = self.ideal_action(ideal_mg_per_week)
@@ -45,5 +46,6 @@ class ModelBaseClass():
             self.update_model(patient, actual_action, ideal_action)
             if ideal_action != actual_action:
                 cumulative_regret += -1
+            self.predictions.append(actual_action)
             patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
         return cumulative_regret, cumulative_regret / self.data_loader.num_samples()

@@ -9,7 +9,8 @@ class FixedDoseBaseline(ModelBaseClass):
         return self.MED_DOSE
 
 
-baseline = FixedDoseBaseline(DataLoader("data/warfarin.csv"))
-cum_regret, avg_regret = baseline.evaluate_online()
-print("cum_regret {}, avg_regret {}".format(cum_regret, avg_regret))
+if __name__ == '__main__':
+    baseline = FixedDoseBaseline(DataLoader("data/warfarin.csv"))
+    cum_regret, avg_regret = baseline.evaluate_online()
+    print("cum_regret {}, avg_regret {}".format(cum_regret, avg_regret))
 

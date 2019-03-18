@@ -37,4 +37,5 @@ def bucket(data):
     return: ndarray with numerical labels for dosage
     '''
     bins = [0, MED_THRESH*7,HIGH_THRESH*7,data.max()]
-    return pd.cut(data, bins, include_lowest=True, labels=False)
+    bucketed = pd.cut(data, bins, include_lowest=True, labels=False)
+    return bucketed
