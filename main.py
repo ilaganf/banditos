@@ -8,6 +8,7 @@ import random
 import pandas as pd
 
 from LinUCB import LinUCB as alg
+# from LassoUCB import LassoUCB as alg
 # from FixedDoseBaseline import FixedDoseBaseline as alg
 from utils.RefinedDL import RefinedDL as loader
 
@@ -18,12 +19,13 @@ fixed dose: -2319 regret, 53.36% accuracy
 age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 
 '''
-# FEATURES = ['Weight','indic_male', 'indic_female', 'Age', 'Height']
-FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
-            'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
-            'indic_G', 'indic_T']
+FEATURES = ['Weight','indic_male', 'indic_female', 'Age', 'Height']
+# FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
+            # 'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
+            # 'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
+FEATURES = ['indic_male','indic_female']
 
-NUM_TRIALS = 2
+NUM_TRIALS = 1
 
 def main():
     data = pd.read_csv('data/warfarin_clean.csv')
@@ -54,7 +56,7 @@ def main():
     total = sum(counts)
 
     print("Results (averaged over {} trials)".format(NUM_TRIALS))
-    print("Alpha = ", lin_ucb.alpha)
+    # print("Alpha = ", lin_ucb.alpha)
     print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
     print("Accuracy: ", avg_accuracy)
     print("Average low: {} ({}%)".format(counts[0], 100*(counts[0]/total)))
