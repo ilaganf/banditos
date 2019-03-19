@@ -8,12 +8,10 @@ import random
 import pandas as pd
 
 from LinUCB import LinUCB as alg
-<<<<<<< HEAD
+
 from S1fBaseline import S1fBaseline
 
-=======
 # from LassoUCB import LassoUCB as alg
->>>>>>> 0e4ef11e7759de3a50a1712bb5b9dca0563cef9e
 # from FixedDoseBaseline import FixedDoseBaseline as alg
 from utils.RefinedDL import RefinedDL as loader
 
