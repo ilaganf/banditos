@@ -47,14 +47,17 @@ class ModelBaseClass():
         self.predictions = []
         self.times_action_taken = [1.0] * len(self.actions)
         self.seen_data = [[] for _ in range(len(self.actions))]
+        ideal_action_counts = [0.0] * 3
         while patient is not None:
             # reward is 0 if correct action, -1 otherwise
             ideal_action = self.ideal_action(ideal_mg_per_week)
             actual_action = self.next_action(patient)
+            ideal_action_counts[ideal_action] += 1
             self.times_action_taken[actual_action] += 1
             self.update_model(patient, actual_action, ideal_action)
             if ideal_action != actual_action:
                 cumulative_regret += -1
             self.predictions.append(actual_action)
             patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
+        print("ideal action counts {}".format(ideal_action_counts))
         return cumulative_regret, cumulative_regret / self.data_loader.num_samples()

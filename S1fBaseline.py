@@ -25,7 +25,6 @@ class S1fBaseline(ModelBaseClass):
         else:
             vals[7] = 0
 
-        x_t[0] = np.floor(x_t[0] / 10) # make age by decade
         sqrt_weekly_dose = 4.0376
         sqrt_weekly_dose += np.dot(vals, self.weights)
         daily_dose = (sqrt_weekly_dose ** 2) / 7
