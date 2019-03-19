@@ -29,15 +29,15 @@ age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 # #FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
 #             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
 #             'indic_G', 'indic_T']
-#FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
-            # 'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
-            # 'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
-FEATURES = ['indic_male','indic_female']
-#FEATURES = ['Height (cm)', 'Weight (kg)', 'indic_male','indic_female', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
- #                            "med: carbamazepine", "med: phenytoin", "med: rifampin"]
+# FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
+#             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
+#             'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
+# FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
+#                              "med: carbamazepine", "med: phenytoin", "med: rifampin"]
+FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "Mixed race"]
 
 
-NUM_TRIALS = 1
+NUM_TRIALS = 10
 
 def run_s1f():
     #age, weight, height, asian, black or african american,
@@ -96,20 +96,20 @@ def calc_oracle():
             labels[i] = base_class.ideal_action(labels[i])
         return labels
 
-    data = pd.read_csv('data/warfarin_clean.csv')
-    features_of_interest = []
-    for feat in data.columns:
-        for name in FEATURES:
-            if name in feat: features_of_interest.append(feat)
-
-    data_loader = loader("data/warfarin_clean.csv", features_of_interest, random.randint(1, 100))
+    # data = pd.read_csv('data/warfarin_clean2.csv')
+    # features_of_interest = []
+    # for name in FEATURES:
+    #     for feat in data.columns:
+    #         if feat in name: features_of_interest.append(feat)
+    features_of_interest = FEATURES
+    data_loader = loader("data/warfarin_clean3.csv", features_of_interest, random.randint(1, 100))
     true_actions = convert_labels_to_actions(data_loader.labels.values).copy()
     data = data_loader.data.values.copy()
 
     Q = np.zeros((3, data.shape[0]))
     for action in range(3):
         labels = convert_labels_to_rewards(data_loader.labels.values, action)
-        clf = Ridge(alpha=1.0)
+        clf = Ridge(alpha=0.0)
         clf.fit(data, labels)
         Q[action, :] = clf.predict(data)
     pred_actions = np.argmax(Q, axis=0)
@@ -117,7 +117,7 @@ def calc_oracle():
 
 
 def main():
-    data = pd.read_csv('data/warfarin_clean.csv')
+    data = pd.read_csv('data/warfarin_clean3.csv')
     features_of_interest = []
     for feat in data.columns:
         for name in FEATURES:
@@ -126,7 +126,7 @@ def main():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    lin_ucb = alg(loader("data/warfarin_clean.csv", features_of_interest, random.randint(1, 100)))
+    lin_ucb = alg(loader("data/warfarin_clean3.csv", features_of_interest, random.randint(1, 100)))
     
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
     counts = [0,0,0]
@@ -157,6 +157,6 @@ def main():
     print("Average high: {} ({}%)".format(counts[2], 100*(counts[2]/total)))
 
 if __name__ == '__main__':
-   #main()
+   main()
    #run_s1f()
-   calc_oracle()
+   #calc_oracle()
