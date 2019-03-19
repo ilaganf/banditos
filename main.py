@@ -34,10 +34,10 @@ age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 #             'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
 # FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
 #                              "med: carbamazepine", "med: phenytoin", "med: rifampin"]
-FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "Mixed race"]
+FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",\
+            "med: carbamazepine", "med: phenytoin", "med: rifampin", "indic_male", "indic_female"]
 
-
-NUM_TRIALS = 10
+NUM_TRIALS = 5
 
 def run_s1f():
     #age, weight, height, asian, black or african american,
@@ -117,7 +117,7 @@ def calc_oracle():
 
 
 def main():
-    data = pd.read_csv('data/warfarin_clean3.csv')
+    data = pd.read_csv('data/warfarin_clean.csv')
     features_of_interest = []
     for feat in data.columns:
         for name in FEATURES:
@@ -126,7 +126,7 @@ def main():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    lin_ucb = alg(loader("data/warfarin_clean3.csv", features_of_interest, random.randint(1, 100)))
+    lin_ucb = alg(loader("data/warfarin_clean.csv", features_of_interest, random.randint(1, 100)))
     
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
     counts = [0,0,0]
