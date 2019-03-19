@@ -4,6 +4,7 @@ class ModelBaseClass():
         self.data_loader = data_loader
         self.LOW_DOSE, self.MED_DOSE, self.HIGH_DOSE = 0, 1, 2
         self.actions = [self.LOW_DOSE, self.MED_DOSE, self.HIGH_DOSE]
+        self.times_action_taken = [1.0] * len(self.actions)
 
     def next_action(self, patient):
         pass
@@ -39,10 +40,12 @@ class ModelBaseClass():
         cumulative_regret = 0.0
         patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
         self.predictions = []
+        self.times_action_taken = [1.0] * len(self.actions)
         while patient is not None:
             # reward is 0 if correct action, -1 otherwise
             ideal_action = self.ideal_action(ideal_mg_per_week)
             actual_action = self.next_action(patient)
+            self.times_action_taken[actual_action] += 1
             self.update_model(patient, actual_action, ideal_action)
             if ideal_action != actual_action:
                 cumulative_regret += -1
