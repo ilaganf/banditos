@@ -34,9 +34,9 @@ age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 # #FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
 #             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
 #             'indic_G', 'indic_T']
-# FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
-#             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
-#             'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
+FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
+            'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
+            'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
 # FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
 #                              "med: carbamazepine", "med: phenytoin", "med: rifampin"]
 
@@ -147,7 +147,7 @@ def mlp_test():
     avg_regret /= NUM_TRIALS
     avg_accuracy /= NUM_TRIALS
     total = sum(counts)
-    
+
     print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
     print("Accuracy: ", avg_accuracy)
     print("Average low: {} ({}%)".format(counts[0], 100*(counts[0]/total)))
@@ -195,6 +195,7 @@ def run_modified_ucb():
     print("Average low: {} ({}%)".format(counts[0], 100 * (counts[0] / total)))
     print("Average med: {} ({}%)".format(counts[1], 100 * (counts[1] / total)))
     print("Average high: {} ({}%)".format(counts[2], 100 * (counts[2] / total)))
+
 
 def main():
     # Note: this sub function (calculating the confidence interval) is from: https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
@@ -281,7 +282,7 @@ def main():
 
 if __name__ == '__main__':
    main()
-   #mlp_test()
+   # mlp_test()
    #run_s1f()
    #run_modified_ucb()
 
