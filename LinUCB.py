@@ -46,11 +46,31 @@ class LinUCB(ModelBaseClass):
         return next_action
 
 
-    def update_model(self, patient, action, ideal_action):
-        x_t = patient.T if type(patient) is np.ndarray else patient.values.T  # features for the patient, as numpy array of shape (num_features,)
-        # x_t = np.reshape(np.append(x_t, [1]), (-1, 1))
-        reward = 1.0 if action == ideal_action else 0.0
-        # reward = 1.0 if action == ideal_action else -1.0
+    def update_model(self, patient, action, ideal_action, use_modified_reward_extension=True):
+        x_t = patient.values.T  # features for the patient, as numpy array of shape (num_features,)
+        #x_t = np.reshape(np.append(x_t, [1]), (-1, 1))
+        # reward = 0.0 if action == ideal_action else -1.0
+        if use_modified_reward_extension:
+            if action == ideal_action:
+                if action == 0:
+                    reward = 0.1
+                else:
+                    reward = 0
+                # if action == 0:
+                #     reward = np.random.normal(1.2, 2)
+                # else:
+                #     reward = np.random.normal(1, 1)
+            else:
+                reward = 0
+            # elif action == 0:
+            #     reward = -1
+            # elif action == 1:
+            #     reward = -1.8
+            # else:
+            #     reward = -2.0
+            # could try +1 for right action as well
+        else:
+            reward = 0.0 if action == ideal_action else -1.0
         self.A[action] += x_t @ x_t.T
         self.b[action] += reward * x_t
 
