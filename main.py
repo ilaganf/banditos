@@ -34,20 +34,23 @@ age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 #             'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
 # FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
 #                              "med: carbamazepine", "med: phenytoin", "med: rifampin"]
-FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "Mixed race"]
-
+#FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "Mixed race"]
+FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American",
+                     "Unknown or mixed race", "Amiodarone (Cordarone)", "Enzyme inducer status"]
 
 NUM_TRIALS = 10
 
 def run_s1f():
     #age, weight, height, asian, black or african american,
     #missing or mixed race, Enzyme inducer status, Amiodarone status
-    desired_data_features = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
-                             "med: carbamazepine", "med: phenytoin", "med: rifampin"]
+    # desired_data_features = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
+    #                          "med: carbamazepine", "med: phenytoin", "med: rifampin"]
     # carbamazepine, phenytoin, rifampin, or
     # rifampicin
+    desired_data_features = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American",
+                     "Unknown or mixed race", "Amiodarone (Cordarone)", "Enzyme inducer status"]
 
-    data = pd.read_csv('data/warfarin_clean.csv')
+    data = pd.read_csv('data/warfarin_clean5.csv')
     features_of_interest = []
     for name in desired_data_features:
         for feat in data.columns:
@@ -57,7 +60,7 @@ def run_s1f():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    baseline = S1fBaseline(loader("data/warfarin_clean.csv", features_of_interest, random.randint(1, 100)))
+    baseline = S1fBaseline(loader("data/warfarin_clean5.csv", features_of_interest, random.randint(1, 100)))
 
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
     counts = [0, 0, 0]
@@ -102,7 +105,7 @@ def calc_oracle():
     #     for feat in data.columns:
     #         if feat in name: features_of_interest.append(feat)
     features_of_interest = FEATURES
-    data_loader = loader("data/warfarin_clean3.csv", features_of_interest, random.randint(1, 100))
+    data_loader = loader("data/warfarin_clean5.csv", features_of_interest, random.randint(1, 100))
     true_actions = convert_labels_to_actions(data_loader.labels.values).copy()
     data = data_loader.data.values.copy()
 
@@ -159,4 +162,5 @@ def main():
 if __name__ == '__main__':
    main()
    #run_s1f()
+
    #calc_oracle()

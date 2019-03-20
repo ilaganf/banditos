@@ -10,7 +10,7 @@ class FixedDoseBaseline(ModelBaseClass):
 
 
 if __name__ == '__main__':
-    baseline = FixedDoseBaseline(DataLoader("data/warfarin.csv"))
+    baseline = FixedDoseBaseline(DataLoader("data/warfarin_clean.csv"))
     cum_regret, avg_regret = baseline.evaluate_online()
     print("cum_regret {}, avg_regret {}".format(cum_regret, avg_regret))
 
