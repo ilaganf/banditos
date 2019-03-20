@@ -10,12 +10,13 @@ import numpy as np
 
 from LinUCB import LinUCB as alg
 from ModelBaseClass import ModelBaseClass
+from MLPBandit import MLPBandit as MLPBandit
 from sklearn.linear_model import Ridge
 
 from S1fBaseline import S1fBaseline
 
 # from LassoUCB import LassoUCB as alg
-# from FixedDoseBaseline import FixedDoseBaseline as alg
+from FixedDoseBaseline import FixedDoseBaseline as fixedalg
 from utils.RefinedDL import RefinedDL as loader
 
 from utils.eval import evaluate
@@ -34,11 +35,15 @@ age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 #             'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
 # FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
 #                              "med: carbamazepine", "med: phenytoin", "med: rifampin"]
+
 #FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "Mixed race"]
 FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American",
                      "Unknown or mixed race", "Amiodarone (Cordarone)", "Enzyme inducer status"]
 
-NUM_TRIALS = 10
+# FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",\
+#             "med: carbamazepine", "med: phenytoin", "med: rifampin", "indic_male", "indic_female"]
+
+NUM_TRIALS = 5
 
 def run_s1f():
     #age, weight, height, asian, black or african american,
@@ -118,6 +123,36 @@ def calc_oracle():
     pred_actions = np.argmax(Q, axis=0)
     print("% correct is = {}".format(sum(pred_actions == true_actions) / data.shape[0]))
 
+def mlp_test():
+    data = 'data/warfarin_clean.csv'
+    mlp = MLPBandit(data, 5e-4)
+    load = loader('data/warfarin_clean.csv', mlp=mlp)
+    bandit = alg(load, mlp_dim=50)
+    counts = [0,0,0]
+    cum_regret, avg_regret, avg_accuracy = 0, 0, 0
+    for i in range(NUM_TRIALS):
+        reg, avgreg = bandit.evaluate_online()
+        avg_accuracy += evaluate(bandit.predictions, bandit.data_loader.labels)
+        cum_regret += reg
+        avg_regret += avgreg
+        for pred in bandit.predictions:
+            counts[int(pred)] += 1
+        bandit.data_loader.reshuffle()
+
+    cum_regret /= NUM_TRIALS
+    avg_regret /= NUM_TRIALS
+    avg_accuracy /= NUM_TRIALS
+    total = sum(counts)
+    
+    print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
+    print("Accuracy: ", avg_accuracy)
+    print("Average low: {} ({}%)".format(counts[0], 100*(counts[0]/total)))
+    print("Average med: {} ({}%)".format(counts[1], 100*(counts[1]/total)))
+    print("Average high: {} ({}%)".format(counts[2], 100*(counts[2]/total)))
+
+
+def run_modified_ucb():
+    pass
 
 def main():
     data = pd.read_csv('data/warfarin_clean3.csv')
@@ -129,7 +164,7 @@ def main():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    lin_ucb = alg(loader("data/warfarin_clean3.csv", features_of_interest, random.randint(1, 100)))
+    lin_ucb = alg(loader("data/warfarin_clean3.csv", features=features_of_interest, seed=random.randint(1, 100)))
     
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
     counts = [0,0,0]
@@ -161,6 +196,7 @@ def main():
 
 if __name__ == '__main__':
    main()
+   #mlp_test()
    #run_s1f()
 
    #calc_oracle()

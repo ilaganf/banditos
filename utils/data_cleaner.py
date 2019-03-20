@@ -98,6 +98,8 @@ def main():
     raw.drop('Race', axis=1, inplace=True)
     raw = pd.concat([raw, pd.DataFrame(race_dict)], axis=1)
 
+    # drop patients that don't have ground truth
+    raw = raw[raw.loc[:,'Therapeutic Dose of Warfarin'].notna()]
 
     clean = pd.get_dummies(raw, prefix='indic')
     clean.fillna(0, inplace=True) # in case nas escaped earlier somehow

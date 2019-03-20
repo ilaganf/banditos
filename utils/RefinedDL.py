@@ -12,7 +12,7 @@ class RefinedDL(DataLoader):
     Data loader that uses features based on a feature list
     '''
 
-    def __init__(self, filename_csv, features=None, seed=420):
+    def __init__(self, filename_csv, features=None, mlp=None, seed=420):
         '''
         Mostly same as regular DataLoader, with main difference being features
 
@@ -26,3 +26,25 @@ class RefinedDL(DataLoader):
         if features:
             self.data = self.data[:,:features] if type(features) is int else self.data.loc[:,features]
         self.ind = 0
+
+        if mlp:
+            self.use_mlp = True
+            self.mlp = mlp
+            self.mlp.train()
+        else:
+            self.use_mlp = False
+
+    def sample_next_patient(self):
+        """
+        Samples without replacement from the patients in the dataset 
+
+        @returns patient, row of features for a given patient, or None if all patients already sampled 
+        """
+        self.ind += 1
+        if self.ind > len(self.data): 
+            return (None, None)
+        if not self.use_mlp:
+            return (self.data[self.ind - 1:self.ind], self.labels[self.ind - 1])
+
+        feat = self.mlp.get_activations(self.data[self.ind - 1:self.ind])
+        return (feat, self.labels[self.ind-1])
