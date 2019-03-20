@@ -117,7 +117,7 @@ def calc_oracle():
 
 
 def main():
-    data = pd.read_csv('data/warfarin_clean.csv')
+    data = pd.read_csv('data/warfarin_clean3.csv')
     features_of_interest = []
     for feat in data.columns:
         for name in FEATURES:
@@ -126,7 +126,7 @@ def main():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    lin_ucb = alg(loader("data/warfarin_clean.csv", features_of_interest, random.randint(1, 100)))
+    lin_ucb = alg(loader("data/warfarin_clean3.csv", features_of_interest, random.randint(1, 100)))
     
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
     counts = [0,0,0]

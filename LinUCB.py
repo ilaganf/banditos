@@ -34,20 +34,13 @@ class LinUCB(ModelBaseClass):
         """
         @param patient dataframe representing features for the patient
         """
-        x_t = patient.values.T # features for the patient, as numpy array of shape (num_features,)
-        # input_shape = patient_vals.shape
-        # input_shape[0, -1] = 1
-        # x_t = np.reshape(np.append(x_t, [1]), (-1, 1))
+        x_t = patient.values.T # features for the patient, as numpy array of shape (num_features,1)
         expected_rewards = [] # each item is (expected reward, action)
         for action in self.actions:
-            # A_a_inv = np.linalg.inv(self.A[action])
             theta = np.linalg.solve(self.A[action], self.b[action])
-            # pred_mean_reward = x_t.T @ A_a_inv @ self.b[action]
             pred_mean_reward = theta.T @ x_t
             variance_bonus = self.alpha * np.sqrt(x_t.T @ np.linalg.solve(self.A[action], x_t))
             expected_rewards.append((pred_mean_reward + variance_bonus, action))
-            # variance_bonus = self.alpha * np.sqrt(np.log(sum(self.times_action_taken)) / (2.0 * self.times_action_taken[action]))
-            # expected_rewards.append((pred_mean_reward[0][0] + variance_bonus, action))
         next_action = self.select_action(expected_rewards)
 
         return next_action
