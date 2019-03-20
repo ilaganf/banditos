@@ -48,8 +48,8 @@ class MLPBandit:
 if __name__ == '__main__':
     data = pd.read_csv('data/warfarin_clean.csv').sample(frac=1, random_state=42)
     cutoff = int(.15 * len(data))
-    test_set = data[:cutoff]
-    train_set = data[cutoff:]
+    test_set = data.iloc[:cutoff]
+    train_set = data.iloc[cutoff:]
     best_model = None
     best_val = 0
     for x in range(10):
@@ -64,5 +64,5 @@ if __name__ == '__main__':
     labels = test_set['Therapeutic Dose of Warfarin']
     bins = [0, 3*7,7*7,labels.max()]
     test_labels = pd.cut(labels, bins, include_lowest=True, labels=False)
-    test_x = test_set.drop('Therapeutic Dose of Warfarin', axis=1, inplace=True)
-    print("Test accuracy: ", best_model.mlp.score(test_x, test_labels))
+    test_set.drop('Therapeutic Dose of Warfarin', axis=1, inplace=True)
+    print("Test accuracy: ", best_model.mlp.score(test_set, test_labels))

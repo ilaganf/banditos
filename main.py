@@ -30,15 +30,15 @@ age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 # #FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
 #             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
 #             'indic_G', 'indic_T']
-# FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
-#             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
-#             'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
+FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
+            'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
+            'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
 # FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
 #                              "med: carbamazepine", "med: phenytoin", "med: rifampin"]
-FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",\
-            "med: carbamazepine", "med: phenytoin", "med: rifampin", "indic_male", "indic_female"]
+# FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",\
+#             "med: carbamazepine", "med: phenytoin", "med: rifampin"]
 
-NUM_TRIALS = 5
+NUM_TRIALS = 10
 
 def run_s1f():
     #age, weight, height, asian, black or african american,
@@ -136,12 +136,13 @@ def mlp_test():
     avg_regret /= NUM_TRIALS
     avg_accuracy /= NUM_TRIALS
     total = sum(counts)
-    
+
     print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
     print("Accuracy: ", avg_accuracy)
     print("Average low: {} ({}%)".format(counts[0], 100*(counts[0]/total)))
     print("Average med: {} ({}%)".format(counts[1], 100*(counts[1]/total)))
     print("Average high: {} ({}%)".format(counts[2], 100*(counts[2]/total)))
+
 
 def main():
     data = pd.read_csv('data/warfarin_clean.csv')
@@ -153,7 +154,7 @@ def main():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    lin_ucb = alg(loader("data/warfarin_clean.csv", features=features_of_interest, seed=random.randint(1, 100)))
+    lin_ucb = alg(loader("data/warfarin_clean.csv", features=features_of_interest, seed=random.randint(1, 100)), use_mlp=True)
     
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
     counts = [0,0,0]
@@ -184,7 +185,7 @@ def main():
     print("Average high: {} ({}%)".format(counts[2], 100*(counts[2]/total)))
 
 if __name__ == '__main__':
-   # main()
-   mlp_test()
+   main()
+   # mlp_test()
    #run_s1f()
    #calc_oracle()
