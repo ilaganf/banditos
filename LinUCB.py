@@ -45,7 +45,7 @@ class LinUCB(ModelBaseClass):
                 expected_rewards.append((pred_mean_reward + variance_bonus, action))
         else:
             for action in self.actions:
-                x_a = np.concatenate([x_t, [action]], axis=None)
+                x_a = self.make_nn_point(x_t, action)
                 expected_rewards.append((self.mlp.predict([x_a])[0], action))
 
         next_action = self.select_action(expected_rewards)
@@ -54,16 +54,23 @@ class LinUCB(ModelBaseClass):
     def update_model(self, patient, action, ideal_action):
         x_t = patient.T if type(patient) is np.ndarray else patient.values.T  # features for the patient, as numpy array of shape (num_features,)
         reward = 0.0 if action == ideal_action else -1.0
-        new_point = np.concatenate([x_t, [action]], axis=None)
+        new_point = self.make_nn_point(x_t, action)
         self.data.append(new_point)
         self.labels.append(reward)
         if reward == 0:
             for a in self.actions:
                 if a == action: continue
-                self.data.append(np.concatenate([x_t, [a]], axis=None))
+                self.data.append(self.make_nn_point(x_t, a))
                 self.labels.append(-1.0)
         self.A[action] += x_t @ x_t.T
         self.b[action] += reward * x_t
+
+
+    def make_nn_point(self, x, action):
+        act = [0] * self.num_arms
+        for i in range(len(act)):
+            act[i] = int(i==action)
+        return np.concatenate([x, act], axis=None)
 
     def evaluate_online(self):
         """
