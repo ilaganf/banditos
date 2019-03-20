@@ -18,7 +18,7 @@ class LinUCB(ModelBaseClass):
         @param num_features number of features per patient to use for regression
         """
         super(LinUCB, self).__init__(data_loader)
-        self.alpha = 2.5 # assuming delta = 0.05 todo: check
+        self.alpha = 2.0 # assuming delta = 0.05 todo: check
         self.num_arms = len(self.actions)
         self.num_features = len(self.data_loader.get_features()) if not mlp_dim else mlp_dim
         self.data = []
@@ -46,22 +46,22 @@ class LinUCB(ModelBaseClass):
         return next_action
 
 
-    def update_model(self, patient, action, ideal_action, use_modified_reward_extension=True):
+    def update_model(self, patient, action, ideal_action, use_modified_reward_extension=False):
         x_t = patient.values.T  # features for the patient, as numpy array of shape (num_features,)
         #x_t = np.reshape(np.append(x_t, [1]), (-1, 1))
         # reward = 0.0 if action == ideal_action else -1.0
         if use_modified_reward_extension:
             if action == ideal_action:
-                if action == 0:
-                    reward = 0.1
+                if action == 1:
+                    reward = 1.5
                 else:
-                    reward = 0
+                    reward = 1
                 # if action == 0:
                 #     reward = np.random.normal(1.2, 2)
                 # else:
                 #     reward = np.random.normal(1, 1)
             else:
-                reward = 0
+                reward = -1
             # elif action == 0:
             #     reward = -1
             # elif action == 1:

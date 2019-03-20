@@ -23,9 +23,9 @@ import numpy as np
 import csv
 
 INPUT_FILENAME = '../data/warfarin.csv'
-OUTPUT_FILENAME = "../data/warfarin_clean5.csv"
+OUTPUT_FILENAME = "../data/warfarin_clean6.csv"
 
-def main(ignore_missing_data=True):
+def main(ignore_missing_data=False):
     # Only works with float or integer values
     def get_val_or_mean(val, data, key):
         if val and val != "NA":
