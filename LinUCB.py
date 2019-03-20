@@ -19,7 +19,7 @@ class LinUCB(ModelBaseClass):
         @param num_features number of features per patient to use for regression
         """
         super(LinUCB, self).__init__(data_loader)
-        self.alpha = 5.7
+        self.alpha = 2  #5.7
         self.num_arms = len(self.actions)
         self.num_features = len(self.data_loader.get_features()) if not mlp_dim else mlp_dim
 
@@ -45,7 +45,7 @@ class LinUCB(ModelBaseClass):
                 expected_rewards.append((pred_mean_reward + variance_bonus, action))
         else:
             for action in self.actions:
-                x_a = np.concatenate([x_t, [action]], axis=None)
+                x_a = np.concatenate([x_t, [action + 1]], axis=None)
                 expected_rewards.append((self.mlp.predict([x_a])[0], action))
 
         next_action = self.select_action(expected_rewards)
@@ -65,7 +65,7 @@ class LinUCB(ModelBaseClass):
         self.A[action] += x_t @ x_t.T
         self.b[action] += reward * x_t
 
-    def evaluate_online(self):
+    def evaluate_online(self, return_regret_list=False):
         """
         Simulates and evaluates online learning model with samples from data_loader
         
@@ -82,6 +82,7 @@ class LinUCB(ModelBaseClass):
             self.labels = []
             mlp_on = False
             self.mlp = None
+            regret_list = []
             while patient is not None:
                 if mlp_on and self.mlp is None:
                     self.mlp = MLP(hidden_layer_sizes=(50,50), learning_rate_init=8e-4)
@@ -92,10 +93,14 @@ class LinUCB(ModelBaseClass):
                     self.update_model(patient, actual_action, ideal_action)
                 if ideal_action != actual_action:
                     cumulative_regret += -1
+                regret_list.append(int(ideal_action != actual_action))
                 self.predictions.append(actual_action)
                 patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
                 mlp_on = self.data_loader.ind > switch_index
-            return cumulative_regret, cumulative_regret / self.data_loader.num_samples()
+            if return_regret_list:
+                return cumulative_regret, cumulative_regret / self.data_loader.num_samples(), regret_list
+            else:
+                return cumulative_regret, cumulative_regret / self.data_loader.num_samples()
 
 
 if __name__ == '__main__':

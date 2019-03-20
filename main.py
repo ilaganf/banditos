@@ -223,7 +223,7 @@ def main():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    lin_ucb = alg(loader("data/warfarin_clean7.csv", features=features_of_interest, seed=random.randint(1, 100)))
+    lin_ucb = alg(loader("data/warfarin_clean7.csv", features=features_of_interest, seed=random.randint(1, 100)), use_mlp=True)
     fixed_baseline = FixedDoseBaseline(loader("data/warfarin_clean.csv", features=features_of_interest, seed=random.randint(1, 100)))
     
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
@@ -248,7 +248,7 @@ def main():
 
     num_iters = min(len(regret_list), len(regret_list_baseline))
     actions_taken, means, lower_bounds, upper_bounds = plot_confidence_interval_setup(regret_list, 10, num_iters)
-    plt.plot(actions_taken, means, lw = 1, color = 'red', alpha = 1, label = 'LinUCB Average Regret')
+    plt.plot(actions_taken, means, lw = 1, color = 'red', alpha = 1, label = "Hybrid Model")
     plt.fill_between(actions_taken, lower_bounds, upper_bounds, color='red', alpha=0.4, label='95% Confidence Interval')
     print("{} {}".format(means[-1], means[-1] - lower_bounds[-1]))
 
