@@ -36,7 +36,7 @@ class ModelBaseClass():
         cands = [a for r, a in p if r == max_r]
         return random.choice(cands)
 
-    def evaluate_online(self):
+    def evaluate_online(self, return_regret_list=False):
         """
         Simulates and evaluates online learning model with samples from data_loader
         
@@ -48,6 +48,7 @@ class ModelBaseClass():
         self.times_action_taken = [1.0] * len(self.actions)
         self.seen_data = [[] for _ in range(len(self.actions))]
         ideal_action_counts = [0.0] * 3
+        regret_list= []
         while patient is not None:
             # reward is 0 if correct action, -1 otherwise
             ideal_action = self.ideal_action(ideal_mg_per_week)
@@ -57,7 +58,11 @@ class ModelBaseClass():
             self.update_model(patient, actual_action, ideal_action)
             if ideal_action != actual_action:
                 cumulative_regret += -1
+            regret_list.append(int(ideal_action != actual_action))
             self.predictions.append(actual_action)
             patient, ideal_mg_per_week = self.data_loader.sample_next_patient()
         print("ideal action counts {}".format(ideal_action_counts))
-        return cumulative_regret, cumulative_regret / self.data_loader.num_samples()
+        if return_regret_list:
+            return cumulative_regret, cumulative_regret / self.data_loader.num_samples(), regret_list
+        else:
+            return cumulative_regret, cumulative_regret / self.data_loader.num_samples()

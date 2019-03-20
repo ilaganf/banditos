@@ -12,12 +12,16 @@ from LinUCB import LinUCB as alg
 from ModelBaseClass import ModelBaseClass
 from MLPBandit import MLPBandit as MLPBandit
 from sklearn.linear_model import Ridge
+from SimpleLinearAlg import SimpleLinearAlg
+import matplotlib.pyplot as plt
+from FixedDoseBaseline import FixedDoseBaseline
 
 from S1fBaseline import S1fBaseline
 
 # from LassoUCB import LassoUCB as alg
 from FixedDoseBaseline import FixedDoseBaseline as fixedalg
 from utils.RefinedDL import RefinedDL as loader
+import scipy
 
 from utils.eval import evaluate
 '''
@@ -43,7 +47,7 @@ FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African Amer
 # FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",\
 #             "med: carbamazepine", "med: phenytoin", "med: rifampin", "indic_male", "indic_female"]
 
-NUM_TRIALS = 5
+NUM_TRIALS = 1
 
 def run_s1f():
     #age, weight, height, asian, black or african american,
@@ -65,7 +69,7 @@ def run_s1f():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    baseline = S1fBaseline(loader("data/warfarin_clean5.csv", features_of_interest, random.randint(1, 100)))
+    baseline = S1fBaseline(loader("data/warfarin_clean5.csv", features_of_interest))
 
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
     counts = [0, 0, 0]
@@ -110,7 +114,7 @@ def calc_oracle():
     #     for feat in data.columns:
     #         if feat in name: features_of_interest.append(feat)
     features_of_interest = FEATURES
-    data_loader = loader("data/warfarin_clean5.csv", features_of_interest, random.randint(1, 100))
+    data_loader = loader("data/warfarin_clean7.csv", features_of_interest)
     true_actions = convert_labels_to_actions(data_loader.labels.values).copy()
     data = data_loader.data.values.copy()
 
@@ -152,9 +156,6 @@ def mlp_test():
 
 
 def run_modified_ucb():
-    pass
-
-def main():
     data = pd.read_csv('data/warfarin_clean6.csv')
     features_of_interest = []
     for feat in data.columns:
@@ -164,15 +165,77 @@ def main():
     print("Using {} features".format(len(features_of_interest)))
     print(features_of_interest)
 
-    lin_ucb = alg(loader("data/warfarin_clean6.csv", features=features_of_interest, seed=random.randint(1, 100)))
+    modified_ucb = SimpleLinearAlg(loader("data/warfarin_clean6.csv", features=features_of_interest, seed=random.randint(1, 100)))
+
+    cum_regret, avg_regret, avg_accuracy = 0, 0, 0
+    counts = [0, 0, 0]
+    NUM_TRIALS = 1
+    for i in range(NUM_TRIALS):
+        reg, avgreg = modified_ucb.evaluate_online()
+        avg_accuracy += evaluate(modified_ucb.predictions, modified_ucb.data_loader.labels)
+        cum_regret += reg
+        avg_regret += avgreg
+        for pred in modified_ucb.predictions:
+            counts[int(pred)] += 1
+        modified_ucb.data_loader.reshuffle()
+
+    cum_regret /= NUM_TRIALS
+    avg_regret /= NUM_TRIALS
+    avg_accuracy /= NUM_TRIALS
+    total = sum(counts)
+
+    # print(np.sum(lin_ucb.data_loader.labels == 0))
+    # print(np.sum(lin_ucb.data_loader.labels == 1))
+    # print(np.sum(lin_ucb.data_loader.labels == 2))
+
+    print("Results (averaged over {} trials)".format(NUM_TRIALS))
+    # print("Alpha = ", lin_ucb.alpha)
+    print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
+    print("Accuracy: ", avg_accuracy)
+    print("Average low: {} ({}%)".format(counts[0], 100 * (counts[0] / total)))
+    print("Average med: {} ({}%)".format(counts[1], 100 * (counts[1] / total)))
+    print("Average high: {} ({}%)".format(counts[2], 100 * (counts[2] / total)))
+
+def main():
+    # Note: this sub function (calculating the confidence interval) is from: https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
+    def mean_confidence_interval(data, confidence=0.95):
+        a = 1.0 * np.array(data)
+        n = len(a)
+        m, se = np.mean(a), scipy.stats.sem(a)
+        h = se * scipy.stats.t.ppf((1 + confidence) / 2., n - 1)
+        return m, m - h, m + h
+    def plot_confidence_interval_setup(regret_list, cutoff, num_iters):
+        means, lower_bounds, upper_bounds = [], [], []
+        for i in range(cutoff - 1, num_iters):
+            mean, lower_bound, upper_bound = mean_confidence_interval(regret_list[:i + 1])
+            means.append(mean)
+            lower_bounds.append(lower_bound)
+            upper_bounds.append(upper_bound)
+        return range(cutoff, num_iters + 1), means, lower_bounds, upper_bounds
+
+    data = pd.read_csv('data/warfarin_clean7.csv')
+    features_of_interest = []
+    for feat in data.columns:
+        for name in FEATURES:
+            if name in feat: features_of_interest.append(feat)
+
+    print("Using {} features".format(len(features_of_interest)))
+    print(features_of_interest)
+
+    lin_ucb = alg(loader("data/warfarin_clean7.csv", features=features_of_interest, seed=random.randint(1, 100)))
+    fixed_baseline = FixedDoseBaseline(loader("data/warfarin_clean.csv", features=features_of_interest, seed=random.randint(1, 100)))
     
     cum_regret, avg_regret, avg_accuracy = 0, 0, 0
+    regret_list, regret_list_baseline = [], []
     counts = [0,0,0]
     for i in range(NUM_TRIALS):
-        reg, avgreg = lin_ucb.evaluate_online()
+        reg, avgreg, reg_list = lin_ucb.evaluate_online(return_regret_list=True)
+        _, _, reg_list_baseline = fixed_baseline.evaluate_online(return_regret_list=True)
         avg_accuracy += evaluate(lin_ucb.predictions, lin_ucb.data_loader.labels)
         cum_regret += reg
         avg_regret += avgreg
+        regret_list += reg_list
+        regret_list_baseline += reg_list_baseline
         for pred in lin_ucb.predictions:
             counts[int(pred)] += 1
         lin_ucb.data_loader.reshuffle()
@@ -181,6 +244,28 @@ def main():
     avg_regret /= NUM_TRIALS
     avg_accuracy /= NUM_TRIALS
     total = sum(counts)
+
+    num_iters = min(len(regret_list), len(regret_list_baseline))
+    actions_taken, means, lower_bounds, upper_bounds = plot_confidence_interval_setup(regret_list, 10, num_iters)
+    plt.plot(actions_taken, means, lw = 1, color = 'red', alpha = 1, label = 'LinUCB Average Regret')
+    plt.fill_between(actions_taken, lower_bounds, upper_bounds, color='red', alpha=0.4, label='95% Confidence Interval')
+    print("{} {}".format(means[-1], means[-1] - lower_bounds[-1]))
+
+
+    actions_taken, means, lower_bounds, upper_bounds = plot_confidence_interval_setup(regret_list_baseline, 10, num_iters)
+    plt.plot(actions_taken, means, lw=1, color='#539caf', alpha=1, label='Fixed Baseline Average Regret')
+    plt.fill_between(actions_taken, lower_bounds, upper_bounds, color='#539caf', alpha=0.4,
+                     label='95% Confidence Interval')
+    print("{}".format(means[-1] - lower_bounds[-1]))
+
+    plt.xlabel("Number of actions performed")
+    plt.ylabel("Average Regret")
+    plt.legend()
+    plt.show()
+
+    #ax.plot(x_data, y_data, lw = 1, color = '#539caf', alpha = 1, label = 'Fit')
+    # todo: plot barish graph comparing baseline alg to linear alg
+    # todo plot # patients seen vs average regret
 
     # print(np.sum(lin_ucb.data_loader.labels == 0))
     # print(np.sum(lin_ucb.data_loader.labels == 1))
@@ -198,5 +283,6 @@ if __name__ == '__main__':
    main()
    #mlp_test()
    #run_s1f()
+   #run_modified_ucb()
 
    #calc_oracle()

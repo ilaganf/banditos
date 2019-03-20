@@ -23,7 +23,7 @@ import numpy as np
 import csv
 
 INPUT_FILENAME = '../data/warfarin.csv'
-OUTPUT_FILENAME = "../data/warfarin_clean6.csv"
+OUTPUT_FILENAME = "../data/warfarin_clean7.csv"
 
 def main(ignore_missing_data=False):
     # Only works with float or integer values
@@ -32,7 +32,8 @@ def main(ignore_missing_data=False):
             return val
         else:
             #return "NA"
-            return np.nanmean(data[key].values)
+            #return np.nanmean(data[key].values)
+            return np.nanmedian(data[key].values)
 
     data = pd.read_csv('../data/warfarin_clean4.csv')
 

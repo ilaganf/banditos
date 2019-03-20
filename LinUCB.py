@@ -18,7 +18,7 @@ class LinUCB(ModelBaseClass):
         @param num_features number of features per patient to use for regression
         """
         super(LinUCB, self).__init__(data_loader)
-        self.alpha = 2.0 # assuming delta = 0.05 todo: check
+        self.alpha = 1.0 # assuming delta = 0.05 todo: check
         self.num_arms = len(self.actions)
         self.num_features = len(self.data_loader.get_features()) if not mlp_dim else mlp_dim
         self.data = []
