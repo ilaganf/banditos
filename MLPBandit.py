@@ -8,8 +8,8 @@ import numpy as np
 GROUND = "Therapeutic Dose of Warfarin"
 
 class MLPBandit:
-    def __init__(self, data, lr):
-        self.mlp = MLP(hidden_layer_sizes=(50,50,50), learning_rate_init=lr, verbose=True)
+    def __init__(self, data, lr, final_hidden_dim=50):
+        self.mlp = MLP(hidden_layer_sizes=(50,50,final_hidden_dim), learning_rate_init=lr, verbose=True)
         raw = pd.read_csv(data).sample(frac=1, replace=False)
         cutoff = int(.8 * len(raw))
         labels = raw[GROUND]
@@ -33,12 +33,13 @@ class MLPBandit:
             hidden_layer_sizes = [hidden_layer_sizes]
         hidden_layer_sizes = list(hidden_layer_sizes)
         layer_units = [X.shape[1]] + hidden_layer_sizes + \
-            [clf.n_outputs_]
+            [self.mlp.n_outputs_]
         activations = [X]
-        for i in range(clf.n_layers_ - 1):
+        for i in range(self.mlp.n_layers_ - 1):
             activations.append(np.empty((X.shape[0],
                                          layer_units[i + 1])))
-        clf._forward_pass(activations)
+        self.mlp._forward_pass(activations)
+        print(activations[-2])
         return activations[-2]
 
 

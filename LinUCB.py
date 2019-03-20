@@ -12,7 +12,7 @@ from sklearn.linear_model import Ridge
 
 class LinUCB(ModelBaseClass):
     
-    def __init__(self, data_loader):
+    def __init__(self, data_loader, mlp_dim=None):
         """
         @param data_loader See DataLoader.py
         @param num_features number of features per patient to use for regression
@@ -20,7 +20,7 @@ class LinUCB(ModelBaseClass):
         super(LinUCB, self).__init__(data_loader)
         self.alpha = 2.5 # assuming delta = 0.05 todo: check
         self.num_arms = len(self.actions)
-        self.num_features = len(self.data_loader.get_features())
+        self.num_features = len(self.data_loader.get_features()) if not mlp_dim else mlp_dim
         self.data = []
         self.labels = []
 
@@ -34,7 +34,7 @@ class LinUCB(ModelBaseClass):
         """
         @param patient dataframe representing features for the patient
         """
-        x_t = patient.values.T # features for the patient, as numpy array of shape (num_features,1)
+        x_t = patient.T if type(patient) is np.ndarray else patient.values.T # features for the patient, as numpy array of shape (num_features,1)
         expected_rewards = [] # each item is (expected reward, action)
         for action in self.actions:
             theta = np.linalg.solve(self.A[action], self.b[action])
@@ -47,7 +47,7 @@ class LinUCB(ModelBaseClass):
 
 
     def update_model(self, patient, action, ideal_action):
-        x_t = patient.values.T  # features for the patient, as numpy array of shape (num_features,)
+        x_t = patient.T if type(patient) is np.ndarray else patient.values.T  # features for the patient, as numpy array of shape (num_features,)
         # x_t = np.reshape(np.append(x_t, [1]), (-1, 1))
         reward = 1.0 if action == ideal_action else 0.0
         # reward = 1.0 if action == ideal_action else -1.0
