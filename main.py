@@ -30,32 +30,13 @@ fixed dose: -2319 regret, 53.36% accuracy
 age, weight, height, gender, alpha=2.38: -2330 regret, 53.28% accuracy
 
 '''
-#FEATURES = ['Weight','indic_male', 'indic_female', 'Age', 'Height']
-# #FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
-#             'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
-#             'indic_G', 'indic_T']
-FEATURES = ['Weight', 'indic_male', 'indic_female', 'Age', 'Height', \
-            'indic_*', 'indic_1', 'indic_2', 'indic_3', 'indic_A', 'indic_C',\
-            'indic_G', 'indic_T', 'Smoker', 'Acetaminophen', 'Asian', 'Black', 'White', 'Race']
-# FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
-#                              "med: carbamazepine", "med: phenytoin", "med: rifampin"]
 
-#FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "Mixed race"]
 FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American",
                      "Unknown or mixed race", "Amiodarone (Cordarone)", "Enzyme inducer status"]
 
-# FEATURES = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",\
-#             "med: carbamazepine", "med: phenytoin", "med: rifampin", "indic_male", "indic_female"]
-
-NUM_TRIALS = 1
+NUM_TRIALS = 10
 
 def run_s1f():
-    #age, weight, height, asian, black or african american,
-    #missing or mixed race, Enzyme inducer status, Amiodarone status
-    # desired_data_features = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American", 'Unknown Race', "med: amiodarone",
-    #                          "med: carbamazepine", "med: phenytoin", "med: rifampin"]
-    # carbamazepine, phenytoin, rifampin, or
-    # rifampicin
     desired_data_features = ["Age", 'Weight (kg)', 'Height (cm)', "Asian", "Black or African American",
                      "Unknown or mixed race", "Amiodarone (Cordarone)", "Enzyme inducer status"]
 
@@ -94,7 +75,7 @@ def run_s1f():
     print("Average med: {} ({}%)".format(counts[1], 100 * (counts[1] / total)))
     print("Average high: {} ({}%)".format(counts[2], 100 * (counts[2] / total)))
 
-def calc_oracle():
+def calc_oracle(features_of_interest=FEATURES):
     def convert_labels_to_rewards(labels, action):
         labels = labels.copy()
         base_class = ModelBaseClass(None)
@@ -108,13 +89,7 @@ def calc_oracle():
             labels[i] = base_class.ideal_action(labels[i])
         return labels
 
-    # data = pd.read_csv('data/warfarin_clean2.csv')
-    # features_of_interest = []
-    # for name in FEATURES:
-    #     for feat in data.columns:
-    #         if feat in name: features_of_interest.append(feat)
-    features_of_interest = FEATURES
-    data_loader = loader("data/warfarin_clean7.csv", features_of_interest)
+    data_loader = loader("data/warfarin_clean_clean8.csv", features_of_interest)
     true_actions = convert_labels_to_actions(data_loader.labels.values).copy()
     data = data_loader.data.values.copy()
 
@@ -184,12 +159,7 @@ def run_modified_ucb():
     avg_accuracy /= NUM_TRIALS
     total = sum(counts)
 
-    # print(np.sum(lin_ucb.data_loader.labels == 0))
-    # print(np.sum(lin_ucb.data_loader.labels == 1))
-    # print(np.sum(lin_ucb.data_loader.labels == 2))
-
     print("Results (averaged over {} trials)".format(NUM_TRIALS))
-    # print("Alpha = ", lin_ucb.alpha)
     print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
     print("Accuracy: ", avg_accuracy)
     print("Average low: {} ({}%)".format(counts[0], 100 * (counts[0] / total)))
@@ -250,30 +220,18 @@ def main():
     actions_taken, means, lower_bounds, upper_bounds = plot_confidence_interval_setup(regret_list, 10, num_iters)
     plt.plot(actions_taken, means, lw = 1, color = 'red', alpha = 1, label = "Hybrid Model")
     plt.fill_between(actions_taken, lower_bounds, upper_bounds, color='red', alpha=0.4, label='95% Confidence Interval')
-    print("{} {}".format(means[-1], means[-1] - lower_bounds[-1]))
-
 
     actions_taken, means, lower_bounds, upper_bounds = plot_confidence_interval_setup(regret_list_baseline, 10, num_iters)
     plt.plot(actions_taken, means, lw=1, color='#539caf', alpha=1, label='Fixed Baseline Average Regret')
     plt.fill_between(actions_taken, lower_bounds, upper_bounds, color='#539caf', alpha=0.4,
                      label='95% Confidence Interval')
-    print("{}".format(means[-1] - lower_bounds[-1]))
 
     plt.xlabel("Number of actions performed")
     plt.ylabel("Average Regret")
     plt.legend()
     plt.show()
 
-    #ax.plot(x_data, y_data, lw = 1, color = '#539caf', alpha = 1, label = 'Fit')
-    # todo: plot barish graph comparing baseline alg to linear alg
-    # todo plot # patients seen vs average regret
-
-    # print(np.sum(lin_ucb.data_loader.labels == 0))
-    # print(np.sum(lin_ucb.data_loader.labels == 1))
-    # print(np.sum(lin_ucb.data_loader.labels == 2))
-
     print("Results (averaged over {} trials)".format(NUM_TRIALS))
-    # print("Alpha = ", lin_ucb.alpha)
     print("Cumulative Regret {}, Average Regret {}".format(cum_regret, avg_regret))
     print("Accuracy: ", avg_accuracy)
     print("Average low: {} ({}%)".format(counts[0], 100*(counts[0]/total)))
@@ -285,5 +243,4 @@ if __name__ == '__main__':
    # mlp_test()
    #run_s1f()
    #run_modified_ucb()
-
    #calc_oracle()

@@ -21,19 +21,18 @@ Observations about the data:
 import pandas as pd
 import numpy as np
 import csv
+from collections import Counter
 
 INPUT_FILENAME = '../data/warfarin.csv'
-OUTPUT_FILENAME = "../data/warfarin_clean7.csv"
+OUTPUT_FILENAME = "../data/warfarin_clean_clean8.csv"
 
-def main(ignore_missing_data=False):
+def main(ignore_missing_data=True):
     # Only works with float or integer values
     def get_val_or_mean(val, data, key):
         if val and val != "NA":
             return val
         else:
-            #return "NA"
-            #return np.nanmean(data[key].values)
-            return np.nanmedian(data[key].values)
+            return np.nanmean(data[key].values)
 
     data = pd.read_csv('../data/warfarin_clean4.csv')
 
@@ -48,6 +47,7 @@ def main(ignore_missing_data=False):
         csv_reader = csv.DictReader(ifile, delimiter=",")
         with open(OUTPUT_FILENAME, "w") as ofile:
             ofile.write(",".join(new_row_names) + "\n")
+            missing_cols = {}
             for row in csv_reader:
                 if ignore_missing_data:
                     is_missing_val = False
@@ -56,6 +56,10 @@ def main(ignore_missing_data=False):
                         val = row[col_name]
                         if val == "NA" or val == "":
                             is_missing_val = True
+                            if col_name in missing_cols:
+                                missing_cols[col_name] += 1
+                            else:
+                                missing_cols[col_name] = 1
                     if is_missing_val:
                         continue
 
@@ -99,6 +103,8 @@ def main(ignore_missing_data=False):
 
                 new_values = [str(val) for val in new_values]
                 ofile.write(",".join(new_values) + "\n")
+
+            print(missing_cols)
 
 
 if __name__ == '__main__':

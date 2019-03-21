@@ -29,6 +29,8 @@ class LinUCB(ModelBaseClass):
         self.b = np.zeros((self.num_arms, self.num_features, 1))
 
         self.use_mlp = use_mlp
+        self.data = []
+        self.labels = []
 
 
     def next_action(self, patient, mlp_mode=False):
@@ -79,7 +81,7 @@ class LinUCB(ModelBaseClass):
         @returns cumulative_regret, avg_regret 
         """
         if not self.use_mlp:
-            super(LinUCB, self).evaluate_online()
+            return super(LinUCB, self).evaluate_online(return_regret_list)
         else:
             cumulative_regret = 0.0
             switch_index = len(self.data_loader.data) // 2
